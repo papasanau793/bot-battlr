@@ -1,25 +1,65 @@
-import logo from './logo.svg';
+import React, { useEffect, useState } from "react";
+import BotCollection from "./components/BotCollection";
+import YourBotArmy from "./components/YourBotArmy";
 import './App.css';
 
 function App() {
+  const [bots, setBots] = useState([]);
+  const [armyBots, setArmyBots] = useState([]);
+
+  // Fetch bots from server
+  useEffect(() => {
+    fetch("http://localhost:8001/bots")
+      .then((res) => res.json())
+      .then((data) => setBots(data))
+      .catch((err) => console.error("Failed to fetch bots:", err));
+  }, []);
+
+  // Enlist bot (add to army if not already there)
+  const handleEnlist = (bot) => {
+    if (!armyBots.some((b) => b.id === bot.id)) {
+      setArmyBots([...armyBots, bot]);
+    }
+  };
+
+  // Release bot (remove from army, not from full list)
+  const handleRelease = (bot) => {
+    setArmyBots(armyBots.filter((b) => b.id !== bot.id));
+  };
+
+  // Discharge bot (delete from backend and remove from everywhere)
+  const handleDischarge = (bot) => {
+    fetch(`http://localhost:8001/bots/${bot.id}`, {
+      method: "DELETE",
+    })
+      .then(() => {
+        setBots(bots.filter((b) => b.id !== bot.id));
+        setArmyBots(armyBots.filter((b) => b.id !== bot.id));
+      })
+      .catch((err) => console.error("Failed to discharge bot:", err));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <div className="App" style={{ padding: "20px", fontFamily: "sans-serif" }}>
+      <h1 style={{ textAlign: "center" }}>:robot_face: Bot Battlr</h1>
+
+  <YourBotArmy
+    armyBots={armyBots}
+    onRelease={handleRelease}
+    onDischarge={handleDischarge}
+  />
+
+  <hr style={{ margin: "30px 0" }} />
+
+  <BotCollection
+    bots={bots}
+    armyBots={armyBots}
+    onEnlist={handleEnlist}
+    onDischarge={handleDischarge}
+  />
+</div>
   );
 }
 
 export default App;
+
