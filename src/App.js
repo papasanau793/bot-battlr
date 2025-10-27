@@ -9,7 +9,7 @@ function App() {
 
   // Fetch bots from server
   useEffect(() => {
-    fetch("http://localhost:8001/bots")
+    fetch("https://json-server-vercel-bjbw.vercel.app/bots")
       .then((res) => res.json())
       .then((data) => setBots(data))
       .catch((err) => console.error("Failed to fetch bots:", err));
@@ -29,7 +29,7 @@ function App() {
 
   // Discharge bot (delete from backend and remove from everywhere)
   const handleDischarge = (bot) => {
-    fetch(`http://localhost:8001/bots/${bot.id}`, {
+    fetch(`https://json-server-vercel-bjbw.vercel.app/bots${bot.id}`, {
       method: "DELETE",
     })
       .then(() => {
